@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	delay = 1 * time.Second
+	delay = 1 * time.Millisecond
 	message = "Hello, world!"
 )
 
@@ -41,6 +41,6 @@ func main() {
 			println("Count:", count)
 		}
 
-		//time.Sleep(delay)
+		time.Sleep(delay)
 	}
 }
