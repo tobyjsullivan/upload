@@ -24,6 +24,7 @@ func main()  {
 	}
 
 	count := 0
+	i := 0
 	buffer := make([]byte, 1024)
 	for {
 		n, _, err := conn.ReadFrom(buffer)
@@ -31,13 +32,12 @@ func main()  {
 			panic(err.Error())
 		}
 
-		content := buffer[:n]
-		if string(content) == message {
-			count++
-		}
+		//content := buffer[:n]
+		count += n
+		i++
 
-		if count % 100 == 0 {
-			println("Count:", count)
+		if i % 100 == 0 {
+			println("Received:", count, "bytes")
 		}
 	}
 }

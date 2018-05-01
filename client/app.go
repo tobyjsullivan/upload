@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"time"
 	"log"
+	"math/rand"
 )
 
 const (
-	delay = 1 * time.Millisecond
-	message = "Hello, world!"
+	delay     = 1 * time.Millisecond
+	maxMsgLen = 9216
 )
 
 func main() {
@@ -30,15 +31,23 @@ func main() {
 	}
 
 	count := 0
+	i := 0
 	for {
-		_, err = conn.Write([]byte(message))
+		l := rand.Intn(maxMsgLen)
+		message := make([]byte, l)
+		_, err := rand.Read(message[:])
+		if err != nil {
+			panic(err.Error())
+		}
+		n, err := conn.Write(message[:])
 		if err != nil {
 			panic(err)
 		}
-		count++
+		count += n
+		i++
 
-		if count % 100 == 0 {
-			println("Count:", count)
+		if i % 100 == 0 {
+			println("Sent:", count, "bytes")
 		}
 
 		time.Sleep(delay)
