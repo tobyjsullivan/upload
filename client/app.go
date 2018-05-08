@@ -1,13 +1,12 @@
 package main
 
 import (
-	"net"
 	"os"
 	"fmt"
 	"time"
 	"log"
-	"math/rand"
 	"context"
+	"net"
 )
 
 const (
@@ -47,10 +46,10 @@ func runThread(ipAddress, port string, countPipe chan int) {
 
 	message := make([]byte, maxMsgLen)
 	for {
-		_, err := rand.Read(message[:])
-		if err != nil {
-			panic(err.Error())
-		}
+		//n, err := rand.Read(message[:])
+		//if err != nil {
+		//	panic(err.Error())
+		//}
 		n, err := conn.Write(message[:])
 		if err != nil {
 			panic(err)
