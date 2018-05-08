@@ -5,10 +5,7 @@ import (
 	"log"
 	"net"
 	"fmt"
-)
-
-const (
-	message = "Hello, world!"
+	"time"
 )
 
 func main()  {
@@ -18,26 +15,50 @@ func main()  {
 		log.Fatalln("Must define PORT")
 	}
 
-	conn, err := net.ListenPacket("udp", fmt.Sprintf(":%s", port))
+	conn, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	count := 0
-	i := 0
-	buffer := make([]byte, 1024)
+	countPipe := make(chan int, 5)
+	go runReports(countPipe)
 	for {
-		n, _, err := conn.ReadFrom(buffer)
+		conn, err := conn.Accept()
 		if err != nil {
 			panic(err.Error())
 		}
 
-		//content := buffer[:n]
-		count += n
+		go handleConn(conn, countPipe)
+	}
+
+}
+
+func handleConn(conn net.Conn, countPipe chan int) {
+	buffer := make([]byte, 1024)
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			println("Error:", err.Error())
+			break
+		}
+
+		countPipe<-n
+	}
+}
+
+func runReports(countPipe chan int) {
+	start := time.Now()
+	totalBytes := 0
+	i := 0
+	for n := range countPipe {
 		i++
+		totalBytes+= n
 
 		if i % 100 == 0 {
-			println("Received:", count, "bytes")
+			elapsed := time.Now().Sub(start)
+			secondsElapsed := elapsed.Seconds()
+			uploadRateKbps := float64(float64(totalBytes) / secondsElapsed) / 1024
+			println(fmt.Sprintf("Rate: %.1f kbps\tSent: %d bytes in %.2f seconds", uploadRateKbps, totalBytes, secondsElapsed))
 		}
 	}
 }

@@ -14,7 +14,7 @@ resource "aws_security_group" "allow_udp_in" {
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     from_port = 80
-    protocol = "udp"
+    protocol = "tcp"
     to_port = 80
   }
 

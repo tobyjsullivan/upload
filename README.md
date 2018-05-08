@@ -1,2 +1,2 @@
 # upload
-WIP: Experiment with uploading via UDP
+WIP: Experiment with uploading via any means necessary.
