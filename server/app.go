@@ -8,7 +8,11 @@ import (
 	"time"
 )
 
-func main()  {
+const (
+	bufferSize = 32 * 1024
+)
+
+func main() {
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -34,7 +38,7 @@ func main()  {
 }
 
 func handleConn(conn net.Conn, countPipe chan int) {
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, bufferSize)
 	for {
 		n, err := conn.Read(buffer)
 		if err != nil {
@@ -42,7 +46,7 @@ func handleConn(conn net.Conn, countPipe chan int) {
 			break
 		}
 
-		countPipe<-n
+		countPipe <- n
 	}
 }
 
@@ -52,13 +56,15 @@ func runReports(countPipe chan int) {
 	i := 0
 	for n := range countPipe {
 		i++
-		totalBytes+= n
+		totalBytes += n
 
-		if i % 100 == 0 {
+		if i%10000 == 0 {
 			elapsed := time.Now().Sub(start)
 			secondsElapsed := elapsed.Seconds()
-			uploadRateKbps := float64(float64(totalBytes) / secondsElapsed) / 1024
+			uploadRateKbps := float64(float64(totalBytes)/secondsElapsed) / 1024
 			println(fmt.Sprintf("Rate: %.1f kbps\tSent: %d bytes in %.2f seconds", uploadRateKbps, totalBytes, secondsElapsed))
+			start = time.Now()
+			totalBytes = 0
 		}
 	}
 }

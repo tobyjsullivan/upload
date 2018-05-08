@@ -12,8 +12,8 @@ import (
 
 const (
 	delay     = 1 * time.Millisecond
-	maxMsgLen = 50000
-	nThreads = 5
+	maxMsgLen = 32*1024
+	nThreads = 1
 )
 
 func main() {
@@ -45,8 +45,8 @@ func runThread(ipAddress, port string, countPipe chan int) {
 		panic(err.Error())
 	}
 
+	message := make([]byte, maxMsgLen)
 	for {
-		message := make([]byte, maxMsgLen)
 		_, err := rand.Read(message[:])
 		if err != nil {
 			panic(err.Error())
@@ -71,11 +71,13 @@ func runReports(countPipe chan int) {
 		i++
 		totalBytes += n
 
-		if i%100 == 0 {
+		if i%10000 == 0 {
 			elapsed := time.Now().Sub(start)
 			secondsElapsed := elapsed.Seconds()
 			uploadRateKbps := float64(float64(totalBytes) / secondsElapsed) / 1024
 			println(fmt.Sprintf("Rate: %.1f kbps\tSent: %d bytes in %.2f seconds", uploadRateKbps, totalBytes, secondsElapsed))
+			start = time.Now()
+			totalBytes = 0
 		}
 	}
 }

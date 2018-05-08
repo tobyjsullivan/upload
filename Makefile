@@ -17,3 +17,7 @@ ssh/linux/server:
 
 infra/teardown:
 	cd ./infra && terraform destroy
+
+build: bin/client bin/server bin/linux/server
+
+.PHONY: build
